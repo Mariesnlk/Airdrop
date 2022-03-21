@@ -45,8 +45,6 @@ contract Airdrop is IAirdrop, EIP712, Ownable {
      * Emits a {Transfer, Deposit} event.
      */
     function depositEther() external payable override onlyOwner {
-        require(msg.sender.balance >= msg.value, "Airdrop: Not enough funds");
-
         emit Deposit(msg.sender, address(this), msg.value);
     }
 
@@ -205,7 +203,7 @@ contract Airdrop is IAirdrop, EIP712, Ownable {
      *
      * Emits a {Claimed} event.
      */
-    function claimEther() external payable override {
+    function claimEther() external override {
         require(
             _etherAmountsToRecipients[msg.sender].claimedAmount != 0,
             "Airdrop: you don`t have permission"
