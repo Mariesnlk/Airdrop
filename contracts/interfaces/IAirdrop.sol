@@ -104,5 +104,5 @@ interface IAirdrop {
      *
      * Emits a {Claimed} event.
      */
-    function claimEther() external payable;
+    function claimEther() external;
 }
