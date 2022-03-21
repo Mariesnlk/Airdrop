@@ -17,7 +17,6 @@ contract Airdrop is IAirdrop, EIP712, Ownable {
 
     mapping(address => Receipient) public _tokenAmountsToRecipients;
     mapping(address => Receipient) public _etherAmountsToRecipients;
-    mapping(address => uint256) public balancesOfEthers;
 
     constructor(IERC20 customToken_) EIP712("Airdrop", "v1") {
         customToken = customToken_;
@@ -47,8 +46,6 @@ contract Airdrop is IAirdrop, EIP712, Ownable {
      */
     function depositEther() external payable override onlyOwner {
         require(msg.sender.balance >= msg.value, "Airdrop: Not enough funds");
-
-        balancesOfEthers[address(this)] += msg.value;
 
         emit Deposit(msg.sender, address(this), msg.value);
     }
@@ -163,7 +160,7 @@ contract Airdrop is IAirdrop, EIP712, Ownable {
      * Emits a {Transfer, Withdraw} event.
      */
     function withdrawEther() external payable override onlyOwner {
-        uint256 balanceOfAirdropContract = balancesOfEthers[address(this)];
+        uint256 balanceOfAirdropContract = address(this).balance;
         require(
             balanceOfAirdropContract > 0,
             "Airdrop: Contract doesn`t have enough ethers!"
@@ -172,8 +169,6 @@ contract Airdrop is IAirdrop, EIP712, Ownable {
         require(success, "Airdrop: Failed to withdraw Ether");
 
         emit Withdraw(address(this), msg.sender, balanceOfAirdropContract);
-
-        balancesOfEthers[address(this)] -= balanceOfAirdropContract;
     }
 
     /**
@@ -223,13 +218,12 @@ contract Airdrop is IAirdrop, EIP712, Ownable {
             .claimedAmount;
         require(claimedAmount > 0, "Airdrop: nothing ether to claim");
         require(
-            balancesOfEthers[address(this)] >= claimedAmount,
+            address(this).balance >= claimedAmount,
             "Airdrop: Contract doesn`t have enough ethers! "
         );
         (bool success, ) = msg.sender.call{value: claimedAmount}("");
         require(success, "Airdrop: Failed to claim Ether");
-        balancesOfEthers[address(this)] -= claimedAmount;
-        balancesOfEthers[msg.sender] += claimedAmount;
+
         _etherAmountsToRecipients[msg.sender].isClaimed = true;
 
         emit Claimed(address(this), msg.sender, claimedAmount);
