@@ -110,7 +110,8 @@ contract('Airdrop', (accounts) => {
                 value: ether("10"),
             });
 
-            expect(await contract.balancesOfEthers(contract.address))
+            let balance = web3.eth.getBalance(contract.address);
+            expect(await balance)
                 .to.be.a.bignumber.equal(ether("10"));
         });
     });
@@ -173,13 +174,15 @@ contract('Airdrop', (accounts) => {
 
         it('cannot withdraw ethers if contract balance is zero', async () => {
             let airdrop = this.airdrop;
-            expect(await airdrop.balancesOfEthers(airdrop.address))
+            let balance = web3.eth.getBalance(airdrop.address);
+            expect(await balance)
                 .to.be.a.bignumber.equal(ether("0"));
             await expectRevert(
                 airdrop.withdrawEther(),
                 "Airdrop: Contract doesn`t have enough ethers!"
             );
-            expect(await airdrop.balancesOfEthers(airdrop.address))
+            balance = web3.eth.getBalance(airdrop.address);
+            expect(await balance)
                 .to.be.a.bignumber.equal(ether("0"));
         });
 
@@ -191,7 +194,8 @@ contract('Airdrop', (accounts) => {
                 to: airdrop.address,
                 value: ether("10"),
             });
-            expect(await airdrop.balancesOfEthers(airdrop.address))
+            let balance = web3.eth.getBalance(airdrop.address);
+            expect(await balance)
                 .to.be.a.bignumber.equal(ether("10"));
             const withdraw = await airdrop.withdrawEther();
             expectEvent(withdraw, 'Withdraw', {
@@ -199,7 +203,8 @@ contract('Airdrop', (accounts) => {
                 to: initialHolder,
                 value: ether("10"),
             });
-            expect(await airdrop.balancesOfEthers(airdrop.address))
+            balance = web3.eth.getBalance(airdrop.address);
+            expect(await balance)
                 .to.be.a.bignumber.equal(ether("0"));
         });
 
@@ -241,7 +246,7 @@ contract('Airdrop', (accounts) => {
                 .to.be.a.bignumber.equal(new BN(0));
         });
 
-        
+
         it('successfully update contract address', async () => {
             let airdrop = this.airdrop;
             let newTokenContract = await CustomERC20.new("New Custom Token", "NCSTMN", 1000);
@@ -569,7 +574,8 @@ contract('Airdrop', (accounts) => {
 
         it('successfully withdraw ethers', async () => {
             await this.airdrop.depositEther({ value: ether("10") });
-            expect(await this.airdrop.balancesOfEthers(this.airdrop.address))
+            let balance = web3.eth.getBalance(this.airdrop.address);
+            expect(await balance)
                 .to.be.a.bignumber.equal(ether("10"));
             let claimed = await this.airdrop.claimEther({ from: recipient3 });
             expectEvent(claimed, 'Claimed', {
@@ -577,10 +583,9 @@ contract('Airdrop', (accounts) => {
                 to: recipient3,
                 value: ether("2"),
             });
-            expect(await this.airdrop.balancesOfEthers(this.airdrop.address))
+            balance = web3.eth.getBalance(this.airdrop.address);
+            expect(await balance)
                 .to.be.a.bignumber.equal(ether("8"));
-            expect(await this.airdrop.balancesOfEthers(recipient3))
-                .to.be.a.bignumber.equal(ether("2"));
         });
     });
 
